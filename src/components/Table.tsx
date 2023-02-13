@@ -1,5 +1,5 @@
 import Client from '@/core/Client'
-import { IconEdit, IconTrash } from './icons'
+import { IconEdit, IconTrash } from '@/components/icons'
 
 interface TableProps {
   clients: Client[]

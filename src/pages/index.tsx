@@ -1,22 +1,51 @@
+import { useEffect, useState } from "react";
+
 import Client from "@/core/Client";
+import ClientRepository from "@/core/ClientRepository";
+
+import CollectionClient from "@/backend/db/CollectionClient";
 
 import Layout from "@/components/Layout";
 import Table from "@/components/Table";
+import Button from "@/components/Button";
+import Form from "@/components/Form";
 
 export default function Home() {
-  const clients = [
-    new Client('Ana', 34, '1'),
-    new Client('Bia', 44, '2'),
-    new Client('Rosalva', 54, '3'),
-    new Client('Kelly', 24, '4'),
-  ]
 
-  function clientSelected(client: Client) {
-    console.log(client.name);
+  const rep: ClientRepository = new CollectionClient()
+  
+  const [client, setClient] = useState<Client>(Client.empty())
+  const [clients, setClients] = useState<Client[]>([])
+  const [visible, setVisible] = useState<'table'| 'form'>('table')
+
+  useEffect(getAll, [])
+  
+  function getAll(){
+    rep.getAll()
+      .then(clients => {
+        setClients(clients)
+        setVisible('table')
+      })
   }
 
-  function clientExcluded(client: Client) {
-    console.log(client.name);
+  function clientSelected(client: Client) {
+    setClient(client)
+    setVisible('form')
+  }
+
+  async function clientExcluded(client: Client) {
+    await rep.delete(client)
+    getAll()
+  }
+
+  async function clientSaved(client: Client) {
+    await rep.save(client)
+    getAll()
+  }
+
+  function newClient() {
+    setClient(Client.empty())
+    setVisible('form')
   }
 
   return (
@@ -26,7 +55,25 @@ export default function Home() {
       text-zinc-100
     ">
       <Layout title="Cadastro Simples">
-        <Table clients={clients} clientSelected={clientSelected} clientExcluded={clientExcluded}></Table>
+        {visible === 'table' ? (
+          <>
+            <div className="flex justify-end">
+              <Button 
+                className="mb-4"
+                onClick={() => newClient()}
+              >
+                Novo Cliente
+              </Button>
+            </div>
+            <Table clients={clients} clientSelected={clientSelected} clientExcluded={clientExcluded} />
+          </>
+        ) : (
+          <Form 
+            client={client} 
+            clientChange={clientSaved}
+            canceled={() => setVisible('table')}
+          />
+        )}
       </Layout>
     </div>
   )
