@@ -1,9 +1,4 @@
-import { useEffect, useState } from "react";
-
-import Client from "@/core/Client";
-import ClientRepository from "@/core/ClientRepository";
-
-import CollectionClient from "@/backend/db/CollectionClient";
+import useClients from "@/hooks/useClients";
 
 import Layout from "@/components/Layout";
 import Table from "@/components/Table";
@@ -12,41 +7,15 @@ import Form from "@/components/Form";
 
 export default function Home() {
 
-  const rep: ClientRepository = new CollectionClient()
-  
-  const [client, setClient] = useState<Client>(Client.empty())
-  const [clients, setClients] = useState<Client[]>([])
-  const [visible, setVisible] = useState<'table'| 'form'>('table')
-
-  useEffect(getAll, [])
-  
-  function getAll(){
-    rep.getAll()
-      .then(clients => {
-        setClients(clients)
-        setVisible('table')
-      })
-  }
-
-  function clientSelected(client: Client) {
-    setClient(client)
-    setVisible('form')
-  }
-
-  async function clientExcluded(client: Client) {
-    await rep.delete(client)
-    getAll()
-  }
-
-  async function clientSaved(client: Client) {
-    await rep.save(client)
-    getAll()
-  }
-
-  function newClient() {
-    setClient(Client.empty())
-    setVisible('form')
-  }
+  const {
+    client, 
+    clients, 
+    visible, 
+    setVisible, 
+    clientSelected, 
+    clientExcluded, 
+    clientSaved, 
+    newClient} = useClients()
 
   return (
     <div className="
